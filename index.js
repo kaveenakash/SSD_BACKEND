@@ -38,16 +38,16 @@ const startApp = async () => {
     });
 
     success({
-      message: `Successfully connected with the Database \n${DB}`,
+      message: `Successfully connected with the Database \n${DB}`, 
       badge: true
     });
 
-    // const sslServer = https.createServer({
-    //   key: fs.readFileSync(path.join(__dirname, 'cert', 'key.pem')),
-    //   cert: fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem'))
-    // }, app);
+    const sslServer = https.createServer({
+      key: fs.readFileSync(path.join(__dirname, 'cert', 'key.pem')),
+      cert: fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem'))
+    }, app); 
 
-    app.listen(PORT, () => {
+    sslServer.listen(PORT, () => {
       console.log(`Secure app listening on port ${PORT}`)
     })
     

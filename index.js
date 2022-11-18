@@ -8,6 +8,8 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
+const { Server } = require("socket.io");
+
 
 // Bring in the app constants
 const { DB, PORT } = require("./config");
@@ -47,9 +49,33 @@ const startApp = async () => {
       cert: fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem'))
     }, app); 
 
-    sslServer.listen(PORT, () => {
+    const server = sslServer.listen(PORT, () => {
       console.log(`Secure app listening on port ${PORT}`)
     })
+
+    const io = new Server(server, {
+      cors: {
+        origin: "https://localhost:3000",
+        methods: ["GET", "POST"],
+      },
+    });
+    
+    io.on("connection", (socket) => {
+      console.log(`User Connected: ${socket.id}`);
+    
+      socket.on("join_room", (data) => {
+        socket.join(data);
+        console.log(`User with ID: ${socket.id} joined room: ${data}`);
+      });
+    
+      socket.on("send_message", (data) => {
+        socket.to(data.room).emit("receive_message", data);
+      });
+    
+      socket.on("disconnect", () => {
+        console.log("User Disconnected", socket.id);
+      });
+    });
     
   } catch (err) {
     error({
